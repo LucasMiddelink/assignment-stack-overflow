@@ -1,0 +1,161 @@
+version: 2
+
+models:
+  - name: stg_stackoverflow__questions
+    description: "Cleaned and standardized Stack Overflow questions data"
+    columns:
+      - name: question_id
+        description: "Unique identifier for each question"
+        tests:
+          - not_null
+          - unique
+      - name: question_created_at
+        description: "When the question was originally posted"
+        tests:
+          - not_null
+      - name: tags
+        description: "Pipe-separated list of topic tags"
+        tests:
+          - not_null
+      - name: is_unanswered
+        description: "Binary flag: 1 if question has zero answers, 0 otherwise"
+        tests:
+          - not_null
+
+  - name: stg_stackoverflow__tags
+    description: "Cleaned Stack Overflow tag/topic reference data"
+    columns:
+      - name: tag_id
+        description: "Unique identifier for each tag"
+        tests:
+          - not_null
+          - unique
+      - name: tag_name
+        description: "Name of the technology/topic tag"
+        tests:
+          - not_null
+      - name: tag_usage_count
+        description: "Total number of times this tag has been used"
+        tests:
+          - not_null
+
+  - name: stg_stackoverflow__users
+    description: "Cleaned Stack Overflow user profile data"
+    columns:
+      - name: user_id
+        description: "Unique identifier for each user"
+        tests:
+          - not_null
+          - unique
+      - name: user_expertise_level
+        description: "User expertise classification based on reputation"
+        tests:
+          - not_null
+
+  - name: dim_tags
+    description: "Tag/topic dimension table for the star schema"
+    columns:
+      - name: tag_id
+        description: "Primary key - unique identifier for each tag"
+        tests:
+          - not_null
+          - unique
+      - name: tag_name
+        description: "Technology or topic name"
+        tests:
+          - not_null
+      - name: tag_popularity_tier
+        description: "Tag popularity: high_usage, medium_usage, low_usage"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['high_usage', 'medium_usage', 'low_usage']
+
+  - name: dim_users
+    description: "User dimension table with expertise classifications"
+    columns:
+      - name: user_id
+        description: "Primary key - unique identifier for each user"
+        tests:
+          - not_null
+          - unique
+      - name: user_expertise_level
+        description: "User expertise classification based on reputation score"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['novice', 'active', 'experienced', 'expert', 'unknown']
+      - name: reputation
+        description: "User's Stack Overflow reputation points"
+
+  - name: dim_date
+    description: "Date dimension table for time-based analysis"
+    columns:
+      - name: date_id
+        description: "Primary key in YYYYMMDD format"
+        tests:
+          - not_null
+          - unique
+      - name: calendar_date
+        description: "Standard date format"
+        tests:
+          - not_null
+      - name: year
+        description: "Year component"
+        tests:
+          - not_null
+      - name: month_name
+        description: "Full month name"
+        tests:
+          - not_null
+
+  - name: fact_questions
+    description: "Core fact table for Stack Overflow questions analysis. One row per question."
+    columns:
+      - name: question_id
+        description: "Primary key - unique question identifier"
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        description: "Foreign key to dim_users"
+      - name: date_id
+        description: "Foreign key to dim_date"
+        tests:
+          - not_null
+      - name: tags
+        description: "Degenerate dimension - pipe-separated topic tags"
+        tests:
+          - not_null
+      - name: unanswered_question_count
+        description: "Additive measure: 1 if question has zero answers, 0 otherwise"
+        tests:
+          - not_null
+      - name: no_accepted_answer_count
+        description: "Additive measure: 1 if question has no accepted answer, 0 otherwise"
+        tests:
+          - not_null
+      - name: answer_count
+        description: "Total number of answers this question received"
+        tests:
+          - not_null
+      - name: view_count
+        description: "Total views this question has received"
+
+  - name: analysis_view
+    description: "Pre-joined analytical view for dashboard analysis. One row per question-tag combination."
+    columns:
+      - name: question_id
+        description: "Question identifier"
+        tests:
+          - not_null
+      - name: individual_tag
+        description: "Single topic tag extracted from pipe-separated list"
+        tests:
+          - not_null
+      - name: unanswered_question_count
+        description: "Business metric: 1 if completely unanswered, 0 if has answers"
+      - name: user_expertise_level
+        description: "Expertise level of user who asked the question"
+      - name: month_name
+        description: "Month when question was asked"

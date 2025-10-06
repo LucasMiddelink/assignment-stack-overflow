@@ -1,0 +1,78 @@
+version: 2
+
+sources:
+  - name: stackoverflow
+    description: "Stack Overflow public dataset from BigQuery"
+    
+    # BigQuery project and dataset location
+    database: bigquery-public-data
+    schema: stackoverflow
+    
+    tables:
+      # Questions table
+      - name: posts_questions
+        description: "All questions posted on Stack Overflow"
+        columns:
+          - name: id
+            description: "Unique question identifier"
+            tests:
+              - not_null
+              - unique
+          - name: creation_date
+            description: "When the question was posted"
+            tests:
+              - not_null
+          - name: tags
+            description: "Topics/technologies the question is about"
+          - name: answer_count
+            description: "Number of answers this question received"
+          - name: accepted_answer_id
+            description: "ID of the accepted answer (NULL if none)"
+      
+      # Answers table  
+      - name: posts_answers
+        description: "All answers posted on Stack Overflow"
+        columns:
+          - name: id
+            description: "Unique answer identifier"
+            tests:
+              - not_null
+              - unique
+          - name: parent_id
+            description: "ID of the question this answers"
+            tests:
+              - not_null
+          - name: creation_date
+            description: "When the answer was posted"
+            tests:
+              - not_null
+      
+      # Tags table
+      - name: tags
+        description: "Available topic tags and their usage counts"
+        columns:
+          - name: id
+            description: "Unique tag identifier"
+            tests:
+              - not_null
+              - unique
+          - name: tag_name
+            description: "Name of the tag (e.g., 'python', 'javascript')"
+            tests:
+              - not_null
+          - name: count
+            description: "How many times this tag has been used"
+      
+      # Users table
+      - name: users
+        description: "Stack Overflow user profiles"
+        columns:
+          - name: id
+            description: "Unique user identifier"
+            tests:
+              - not_null
+              - unique
+          - name: reputation
+            description: "User's reputation score"
+          - name: creation_date
+            description: "When user joined Stack Overflow"
