@@ -1,7 +1,11 @@
-{{ config(
-    materialized='incremental',
+/* 
+NOTE: materialized is better to have 'incremental' but requires billing to be enabled.
+-- For incremental config:
     unique_key='question_id',
     on_schema_change='fail'
+*/
+{{ config(
+    materialized='view'
 ) }}
 
 with questions_base as (
@@ -10,6 +14,8 @@ with questions_base as (
     -- Date is set to stay within free tier limit
     where question_date >= '2022-01-01'
     
+    
+    /*
     {% if is_incremental() %}
         -- Only process questions new data since last run
         and (
@@ -17,6 +23,7 @@ with questions_base as (
             or question_last_activity_at > (select max(fact_created_at) from {{ this }})
         )
     {% endif %}
+    */
 ),
 
 final as (
