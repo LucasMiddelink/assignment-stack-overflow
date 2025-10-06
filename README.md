@@ -1,3 +1,4 @@
+Dashboard: https://lookerstudio.google.com/reporting/5853456b-ffa8-4663-a534-bf4248b4b9f2
 # Stack Overflow Analytics - Dimensional Data Model
 
 ## Project Overview
